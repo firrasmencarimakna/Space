@@ -20,13 +20,14 @@ export default function HomePage() {
 
   useEffect(() => {
     const checkUser = async () => {
-      // Start a timer for minimum 2 seconds
+      let isRedirecting = false;
       const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 2000));
 
       try {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
+          isRedirecting = true;
           await minLoadingTime;
           router.replace("/login");
           return;
@@ -41,6 +42,7 @@ export default function HomePage() {
         if (error) throw error;
 
         if (!profileData?.tanggal_lahir || !profileData?.avatar_url || !profileData?.nama) {
+          isRedirecting = true;
           await minLoadingTime;
           router.replace("/setup-profile");
           return;
@@ -50,9 +52,10 @@ export default function HomePage() {
       } catch (error) {
         console.error("Error checking user:", error);
       } finally {
-        // Wait for the minimum timer before hiding loading screen
-        await minLoadingTime;
-        setLoading(false);
+        if (!isRedirecting) {
+          await minLoadingTime;
+          setLoading(false);
+        }
       }
     };
 
