@@ -21,9 +21,12 @@ export default function SetupProfilePage() {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const minLoadingTime = new Promise((resolve) => setTimeout(resolve, 2000));
+
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
         if (error || !session) {
+          await minLoadingTime;
           router.replace("/login");
           return;
         }
@@ -44,6 +47,7 @@ export default function SetupProfilePage() {
       } catch (err) {
         console.error(err);
       } finally {
+        await minLoadingTime;
         setLoading(false);
       }
     };
